@@ -5,6 +5,8 @@
 @use "variables" as v;
 
 body {
+  font-family: 'Crimson Text', Georgia, 'Times New Roman', serif;
+  // font-family: 'Cormorant', Georgia, 'Times New Roman', serif;
   padding-bottom: 70px;
   color: var(--global-text-color);
   background-color: var(--global-bg-color);
