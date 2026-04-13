@@ -1,0 +1,409 @@
+---
+title: "Data cleaning"
+subtitle: EBSIPE statistics workshop, HT25
+date: "12 March 2025"
+output:
+  html_document:
+    css: workshop.css
+    toc: no
+    highlight: kate
+    number_sections: no
+    theme: cosmo
+  word_document:
+    toc: no
+  pdf_document:
+    toc: no
+---
+
+```{r include=F}
+knitr::opts_chunk$set(echo = T, eval = T, warning = F, message = F, 
+                      fig.width = 6, fig.asp = 0.618, out.width = "70%", fig.align = "center")
+library(tidyverse)
+library(pander)
+```
+
+#  {.tabset .tabset-fade .tabset-pills .unnumbered}
+
+## Learning objectives
+
+### Learning objectives
+
+-   how to clean and prepare a raw dataset for analysis (e.g., descriptive statistics and regression)
+-   how to use a codebook to clean data
+-   understand variable types and transforming variables for the purpose of the analysis of interest
+-   transforming entire datasets, including pivoting and merging datasets
+
+### Resources
+
+R for Data Science - <https://r4ds.hadley.nz/>
+
+## 0 Setup
+
+### File locations
+
+Download the zip file from Canvas that contains the materials for today's workshop.
+
+Create a new folder called `data-cleaning` (or a name of your choice) somewhere convenient on your computer; put the file `HT25-data-cleaning-practical.html` inside that folder.
+
+Create a new folder called `data` inside the `data-cleaning` folder, and put the remaining files in there.
+
+### RStudio Project setup
+
+Start a new RStudio Project in the `data-cleaning` folder. When you do this, make sure you create it in an [Existing Directory]{style="color:Tomato;"}.
+
+-   Open RStudio
+-   click the 'Create a Project' button in the top left hand side of RStudio's screen (see picture below)
+-   select '[Existing Directory]{style="color:Tomato;"}'
+-   select 'Browse', find the `data-cleaning` folder, then click 'Create Project'
+
+### View these workshop instructions within RStudio
+
+Open a new R script file for today's work. Copy and paste this code into your R script file, then run it.
+
+```{r eval = F}
+source("https://mfransham.github.io/code/html-doc-in-viewer.R")
+htmldoc_in_viewer("HT25-data-cleaning-practical.html")
+```
+
+`r fontawesome::fa(name="triangle-exclamation", fill="red", height="1em")` If `html_doc_in_viewer()` doesn't work, it is almost certainly because you have got the incorrect *file path*. Use the Tab functionality in RStudio to get to the correct file path, and if you aren't sure what I mean by this, watch the short video 'reading data into R' on the Canvas web page (under 'Panopto recordings').
+
+## 1 Research question and data setup
+
+### Research question and data setup
+
+Recall from our series of MT Week 8 workshops that we utilized the Demographic and Health Survey (DHS) to understand the predictors of poor child nutrition in Angola. Our goal in this data cleaning exercise is to answer this question, but instead of providing you with the cleaned data (as we did in Week 8), your job will be to prepare this dataset yourself!
+
+Note that for this exercise, we will be preparing raw data from model datasets, not the same dataset from Angola as in Week 8. These model datasets do not contain any true data from any actual country, and are strictly used for educational purposes. These datasets can be downloaded from the [DHS website](https://dhsprogram.com/data/Download-Model-Datasets.cfm). However, for simplicity, we have provided the datasets you will need already in the folder in Canvas.
+
+**Our research question is:** “What is the relationship between mother's socioeconomic status and child nutrition?"
+
+### Load data
+
+Before we start, ensure that the .csv files we need (`dhs_adult.csv` and `dhs_child.csv`) are in your data folder, along with the metadata file (the codebook) we provided. The two datasets are at the household level and contain information on adults of the households (`dhs_adult.csv`) and information on the children of the households (`dhs_child.csv`). Because we would like to analyze children's outcomes as a function of adults' predictors, we will have to merge these two datasets to obtain a single dataset that contains all of the data we need for our analysis.
+
+As usual, we will first load the `tidyverse` package and then read in our data.
+
+```{r}
+library(tidyverse)
+# library(haven) 
+# library(skimr)
+
+# dhs <- read_csv("data/dhs_survey.csv") # i don't know what this is for sorry
+
+# load adult data
+dhs_adult <- read_csv("data/dhs_adult.csv")
+
+# load child data
+dhs_child <- read_csv("data/dhs_child.csv")
+
+```
+
+We can see in our Global Environment on the righthand side that there are over 37,000 observations, and 94 variables in the child dataset, and 285 in the adult dataset. That's quite a lot of variables! In the next section, we'll work out how to identify the ones we need, and then write code to remove all the ones we don't need.
+
+## 2 Using a codebook
+
+When undergoing data cleaning, you should and will often refer to the relevant dataset's codebook for information on how to clean your data. It is your primary resource for understanding what variables exist in the data and what kind of information they contain. This is crucial for knowing what kind of analysis is even feasible.
+
+In this section, you will filter the data to exclude people on certain conditions, identify which variables you will use to indicate socioeconomic status, rename relevant variables, and remove unnecessary variables.
+
+Let's take a look at the DHS codebook (`DHS_codebook.pdf`) included in the data folder to understand our data better.
+
+### Filtering data based on condition
+
+Some conditions we require for our research question:
+
+1)  Only those over 18 years old included in our sample (to create a more comparable set of mothers); and
+2)  Our sample includes only those who are regular members of the household.
+
+Can you identify the variables in the codebook that are needed for this analysis?
+
+<details>
+
+<summary>Click to reveal answer</summary>
+
+According to page 14, women's information is in record **RECH5**. We can ctrl+F to find the section RECH5 (page 27). On this page, we see that HA1 refers to "women's age in years". Note that if you look in the dhs_adult dataset we have, the variable names are all lowercase. You can run `View(dhs_adult)` or `ls(dhs_adult)` in the console to see this. This means, the age variable of interest for us is `ha1`.
+
+```{r, eval=FALSE}
+
+summary(dhs_adult$ha1) # womens age in years for de-facto and de-jure women aged 15-49 in the household schedule, there's just a lot of missing
+summary(dhs_adult$hv105) 
+
+```
+
+*!! Should we be using HV105 instead of ha1?*
+
+```{r, eval=F}
+
+dhs_women1 <- dhs_adult %>%
+  filter(hv103 == 1,
+         ha1 %in% 18:49)
+
+dhs_women2 <- dhs_adult %>%
+  filter(hv104 == 2, # sex = women
+         hv105 %in% 18:49, # age = 18to49
+         (hv102 ==1 | hv103 == 1)) # defacto OR dejure
+
+
+```
+
+To see whether an individual is a regular member of the household, we can ctrl+F for key words like "household", or we can look at section RECH1 - Household Schedule. We can see that the variables that whether the individual is a regular member of the household are `hv102` and `hv103`.
+
+</details>
+
+Now that we know what variables we need to select on, we can inspect the variables and filter based on the conditions we outlined previously.
+
+```{r}
+#hv102: de jure household member
+#hv103: Slept last night
+# hc1: Child's age in months
+# 
+# 
+dhs_adult <- dhs_adult %>%
+  filter(hv103 == 1,
+         ha1 %in% 18:49)
+# 
+# dhs_women2 <- dhs_adult %>%
+#   filter(hv104 == 2, # sex = women
+#          hv105 %in% 18:49, # age = 18to49
+#          (hv102 ==1 | hv103 == 1)) # defacto OR dejure
+```
+
+<!-- We will select the two variables in the codebook (this, hhid and hv000) to start with. According to the codebook, hhid is a unique identifier for each household represented in the survey, and hv00 is the alphabetic country code to identify where the data was collected. For instance, DR7 is the Dominican Republic, and KH7 is Cambodia. You can read more about the DHS name conventions and data structure here. <https://www.youtube.com/playlist?list=PLagqLv-gqpTNBR0KcyrajAqKrFdsdIqqe>. -->
+
+### Selecting and renaming variables [haven't touched this really yet]
+
+We will use the codebook again, but this time to identify what variables we can use to indicate socioeconomic status (SES) and child nutrition outcomes. Some of the SES variables that we might want to use are: mother's education level, urban/rural residence, and income. Child nutritional outcomes could be measured as children's height and weight.
+
+Let's identify what education variables are available in the codebook. If we search (ctrl+F) the PDF, we can see that "education" appears 53 times in our search results. Women's education outcomes are reported in `ha66` and `ha67`, but we also need to read through HV106 and hv107 to understand better how those outcomes were recorded. When we run summary(dhs\$ha66) in the console, we see that there are 4 categories from 0 to 3, and based on the codebook, we learn that they stand for "No education, Primary, Secondary, and Higher". ha67 reports women's highest level of education. Similarly, ha67 reports the mother's highest level of education. Based on hv107 we can see that it reports for all women except those answering "No education" or with missing data or the response "Don't know".
+
+Pages 6 to 20 provide some background on recoding for variables such as country codes (Page 13), description of individual surveys included in the dataset (Page 35) and imputation procedures (Pg 17). In our workshop, we will work with three categories of variables, those starting with hv (variables stand for household basic data and characteristics) ha (women's survey) and hc (children's survey).
+
+We will now subset our dataset and keep only the variables that we will use in our analysis and rename those variables. There is no right or wrong way to rename variables, the best way is to create names that will help you identify them, but remember the simple the better (eg. choose short names, without capital letters). Let's check the variables V009 and V010 as they provide further information on how the date of birth variable (ha32) was recoded.
+
+```{r}
+# subset variables
+
+#relabel variables
+dhs_adult <- dhs_adult %>%
+  select("hhid", "hv000", "hv001", "hv002", "hv005", "hv006", 
+         "hv007", "hv270", "hv271", "ha1", "ha32", "ha60", 
+         "ha66", "ha67", "ha68", "hv025") %>%
+  # convert missing values codes
+ # rename variables
+  rename(household_id = hhid, 
+         country_code = hv000,
+         cluster = hv001, 
+         household_numb = hv002, 
+         sample_weight = hv005, 
+         month_interv = hv006, 
+         year_interv = hv007, 
+         wealth_quintile = hv270,
+         wealth_index = hv271, 
+         age_mother = ha1, 
+         dob_mother = ha32, 
+         marital_status = ha60, 
+         education_mother = ha66, 
+         educ_year_mother = ha67,
+         educ_country_spec = ha68, 
+         urban_rural = hv025) 
+
+```
+
+## 3 Transforming variables
+
+### Transforming variables
+
+There are a multitude of ways you can transform variables, including their type (e.g., numeric, categorical, factor), their name (as we did above), the definition of their levels, etc.
+
+<!-- Another important step is to transform variables into their correct type. Remember, variables can be numeric and categorical. Numeric variables can be discrete, for which values are countable and have a finite number of possibilities (e.g. number of children per family, number of households per cluster) and continuous, for which values are not countable and have infinite possibilities (e.g. weight, height). Categorical variables are subclassified into nominal, for which is not possible to establish an order in the levels and ordinal, when an order is implied in the levels (e.g. a measure of health quality in a Likert scale, disagree, neutral and agree). -->
+
+### Recoding variables and changing variable types
+
+Recoding the levels of existing variables can be helpful not only to obtain more easily-interpretable results, but also if the nature of our analysis depends on it. For instance, below in the case of wealth quintile, we want to treat it as a categorical variable. Hence, we can recode the initial variable, `wealth_quintile` which is numeric, into a factor variable. The same can be done for `urban_rural`, which we do not want to treat as a numeric variable in our linear regression, but a categorical one.
+
+(Refer to the codebook to examine the response levels of the variables wealth_quintile (hv270) and urban_rural (hv025)).
+
+```{r}
+# create factor variables, rename, convert missing value codes
+dhs_adult <- dhs_adult %>%
+  # convert to factors 
+  mutate(wealth_quintile = factor(wealth_quintile, 
+                                  levels = c(1,2,3,4,5), 
+                                  labels = c("Poorest", 
+                                             "Poorer", 
+                                             "Midd", ## update mispelling
+                                             "Richer", 
+                                             "Richest") ), 
+         urban_rural = factor(urban_rural,
+                              levels = c(1,2),
+                              labels = c("Urban", "Rural") ) )
+
+```
+
+**Exercise:**
+
+1.  Convert the marital status variable from numeric to categorical, with the proper corresponding levels.
+2.  Convert the education variable from numeric to categorical, with the proper corresponding levels.
+
+### Creating new variables
+
+In addition to recoding existing variables, there may be instances where we need to create entirely new variables from existing ones, for our analysis. For instance, if we are only interested in education as a binary variable -- i.e., we only want to compare mothers with and without education (with no interest in the level of education achieved), we can create such a variable from the information in `education_mother`. 
+
+```{r}
+
+table(dhs_adult$education_mother) # view the levels
+
+dhs_adult %>% 
+  mutate(education_binary = ifelse(education_mother == 0, 0, 1)) %>% 
+  summarise(proportion_educated = mean(education_binary, na.rm = TRUE))
+
+# note that this does not save education_binary as a new variable in the dataset
+
+
+```
+
+
+<!-- Let's say we want to transform children's age from a continuous variable to a discrete variable. We may create a dummy variable that calculates the number of weeks since birth and thus transform the continuous age variable into a discrete variable. Similarly, numeric variables can be transformed into categorical. For instance, the variable education level (hv106) in our dataset has four categories ("No education", "Primary", "Secondary", and "Higher") that were created based on the discrete variable education in single years (hv108). -->
+
+### Handling "miscoded" data?
+
+A last note on misleading encoding. During data collection, numbers are often used to facilitate the process. So, it is very common to see character variables reported as numeric. For instance, in our dataset, the variable hhid assigns a unique identifier number to each participant. In the recoding process, we will transform it into a categorical variable instead of a numeric one. Unique identifiers correspond to an anonymised version of the participant's identification measurements, so it will make no sense to compute the mean and median of IDs. Similarly, the gender variable reports 1 as male and 2 as female. We will transform it into a categorical variable.
+
+We will run the function `str(dhs_adult$household_id)` to check the variable type for household ids in the dataset it is coded as character. We will keep it and only remove the white spaces.
+
+```{r}
+#remove spaces between numbers in the household id variable
+dhs_adult$household_id <- gsub("\\s+", "", dhs_adult$household_id)  # Remove all spaces
+
+```
+
+### Date variables
+
+-   date formats, ways of handling them
+
+```{r}
+
+str(dhs_adult$dob_mother)
+summary(dhs_adult$dob_mother)
+
+dhs_adult$dob_mother <- format(as.Date(dhs_adult$dob_mother), "%Y-%m-%d") #verify correct code with Mark and Victoria
+
+```
+
+### String variables [I'm guessing this fits here?]
+
+-   Checking misspelling
+-   Converting to factors if appropriate
+
+```{r}
+# Wealth quintile mispelling, country code 
+```
+
+
+<!-- ## 7 Creating and transforming variables -->
+
+<!-- -   derived variables -->
+<!-- -   dummy variables -->
+<!-- -   transformed variables (e.g. centred, z score, log) -->
+
+## 4 Dealing with missing data 
+
+### Dealing with missing data codes. Analysing amount of missing data, patterns, ...
+
+In many programming languages missing values are recored as NA. Datasets may also use specific indicators such as -999, 9999, or other unlikely values to signify missing data. The DHS survey we are working with uses 9990 to report missing responses.
+
+We will now Verify the amount of missing data on the variable reporting marital status.
+
+Note: describe different ways of dealing with missing data (imputation using mean appraoch. Include references for other imputation methods including MICS)
+
+```{r, include=FALSE}
+
+#check for missing values
+#is.na(dhs_adult$marital_status)
+
+# finding the number and proportion of missing observations
+is.na(dhs_adult$marital_status) %>% sum() # number
+is.na(dhs_adult$marital_status) %>% mean() # proportion - 99% of values are missing
+
+```
+
+Our dataset is missing 99% of responses on marital status.
+
+
+## 5 Summary statistics
+
+### Creating summary statistics
+
+- identify distributions, outliers, .... Checking duplicates We will now delete all duplicated responses from our dataset.
+
+```{r}
+#removing all duplicates
+dhs_adult <- dhs_adult[!duplicated(dhs_adult), ]
+```
+
+Our dataset has now 3660 after 7 duplicates were removed. Now we can run summary statistics to have a better overview of variable distributions and outliers in our dataset. We are now going to check on measures for central tendency and spread.
+
+```{r}
+#check measures of central tendency
+mean(dhs_adult$age_mother, na.rm = T)
+median(dhs_adult$age_mother, na.rm = T)
+
+#spread
+sd(dhs_adult$age_mother, na.rm = T)
+```
+
+```{r}
+quantile(dhs_adult$age_mother, # the input data
+         # the next line tells R which quantiles to calculate
+         probs = c(0, 0.25, 0.5, 0.75, 1) ) 
+
+quantile(dhs_adult$age_mother, 
+         probs = c(0, 0.25, 0.5, 0.75, 1) )
+```
+
+```{r eval = F}
+#Checking outliers
+#NOte: introduce some outliers in the age variable
+
+
+ang_ch <- ang_ch %>%
+  # convert missing values codes
+  mutate(hc70 = ifelse(hc70 < 9990, hc70, NA), 
+         stunt = ifelse(hc70 < -200, 1, 0), 
+         hc71 = ifelse(hc71 < 9990, hc71, NA), 
+         underweight = ifelse(hc71 < -200, 1, 0), 
+         hc61 = ifelse(hc61 == 8, NA, hc61) ) 
+```
+
+Note to Mark and Victoria: Are we going to include a summary statistics table and plots for visualisation?
+
+
+## 6 Exercise 
+
+Now is your turn. clean the child dataset and prepare it for merging with the adult dataset.
+
+The main outcomes we are interested in the children's survey is height for age and weight for age. Both variables are a ‘z score’ which measures the difference between the height and weight of a child and the mean expected height and weight for a child of their age and sex, in terms of numbers of standard deviations of the height and weight distribution. This number is multiplied by 100, which means that children with a score of 200 are two standard deviation taller than the mean and those with a score of -200 are two standard deviation shorther than the mean and are considered to ‘be stunted’ - to be much shorter than expected for their age, potentially caused by poor nutrition.
+
+1.  Find in the variables reporting height and weight for age as a measure of standard deviations.
+2.  Create a dataset that includes children nutrional outcomes and demoghraphics such as age, sex education level, month and year of birth of child.
+3.  Rename variables, create summary statistics and deal with duplicates and missing data.
+4.  Transform variables to their most appropriate classification (caregorical and numeric), create factor variables, and rename each response level.
+
+## 6a Answers for the Exercise
+
+
+## 7 Merging datasets
+
+merge using household id (hhid) and country code (hv000). merging using left_join etc.
+
+```{r}
+#merge adult and child datasets
+```
+
+## 9 Pivoting data
+
+going from long to wide using pivot_wider (and vice-versa?)
+
+## 10 Analysis
+
+running an analysis using our cleaned dataset!!
