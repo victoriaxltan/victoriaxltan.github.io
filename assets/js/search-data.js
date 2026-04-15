@@ -398,8 +398,8 @@ ninja.data = [{
           description: "",
           section: "Books",handler: () => {
               window.location.href = "/books/the_godfather/";
-            },},{id: "news-new-personal-website-brewing-construction",
-          title: 'New personal website brewing! :construction:',
+            },},{id: "news-new-personal-website-brewing-coffee",
+          title: 'New personal website brewing! :coffee:',
           description: "",
           section: "News",},{id: "news-i-ll-be-presenting-my-paper-on-ethnic-fluidity-among-britain-s-asian-diaspora-next-week-at-the-british-journal-of-sociology-conference-in-london-and-at-the-canadian-sociological-association-halifax-and-american-sociological-association-nyc-annual-meetings-later-this-year-smile",
           title: 'I’ll be presenting my paper on ethnic fluidity among Britain’s Asian diaspora next...',
