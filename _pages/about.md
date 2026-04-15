@@ -29,16 +29,15 @@ latest_posts:
 
 Hello! I am a PhD student, quantitative researcher, and teaching fellow at the University of Oxford's Department of Social Policy & Intervention. 
 
-My PhD centers the Asian diaspora in Canada and the UK to understand the divergent ways that racialized social systems structure racialized people's lives. This includes varied effects on political behaviour, health, and racial/ethnic identity formation itself, within the diaspora. You can find the first paper from my PhD on how COVID-19 anti-Asian racism affected Asian Canadians' party support, [here](https://doi.org/10.1007/s12552-025-09480-y). I am funded by the Canadian Social Sciences and Humanities Research Council and my department's Barnett Scholarship. 
+My PhD centers the Asian diaspora in Canada and the UK to understand the divergent ways that racialized social systems structure racialized people's lives. This includes varied effects on political behaviour, health, and racial/ethnic identity formation itself, within the diaspora. You can check out my first PhD paper, on how COVID-19 anti-Asian racism affected Asian Canadians' party support, [here](https://doi.org/10.1007/s12552-025-09480-y). I am funded by the Canadian Social Sciences and Humanities Research Council Doctoral Fellowship and my department's Barnett Scholarship. 
 
-Prior to my PhD, I completed a Master of Science in Health Services Research and an Honours Bachelor of Science in Life Sciences at the University of Toronto in Canada. 
-
-
+Prior to my PhD, I completed a Master of Science in Health Services Research and an Honours Bachelor of Science in Life Sciences at the University of Toronto in Canada. When I'm not working, you can usually find me reading/climbing/drawing/practicing piano/trying something new.
 
 
-<!-- As my research interests are quite broad, I would be happy to discuss any ideas/projects related to: racial/ethnic inequalities, fluidity in ethnic/racial identity, structural drivers of health and social inequalities (e.g., politics, policy, structural racism), innovative and critical uses of race/ethnicity in quantitative research, and the politics of the Asian diaspora in Canada, the US, and the UK. -->
+
+<!-- As my research interests are quite broad, I would be happy to discuss any ideas/projects related to: racial/ethnic inequalities, fluidity in ethnic/racial identity, structural drivers of health and social inequalities (e.g., politics, policy, structural racism), innovative and critical uses of race/ethnicity in quantitative research, and the politics of the Asian diaspora in Canada, the US, and the UK. 
 
 
-[This site is under construction.]
+[This site is under construction.] -->
 
 
