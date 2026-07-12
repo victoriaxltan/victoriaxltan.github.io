@@ -1,5 +1,5 @@
 ---
-layout: book-shelf
+layout: book-shelf2
 title: bookshelf
 permalink: /books/
 nav: false
