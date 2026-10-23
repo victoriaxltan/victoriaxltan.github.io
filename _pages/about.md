@@ -29,7 +29,7 @@ latest_posts:
 
 Hello! I am a PhD student and quantitative researcher at the University of Oxford's Department of Social Policy & Intervention. 
 
-My research spans political science, sociology, and public health. I ask questions pertaining to the dynamic and fluid nature of racial and ethnic categorization and the consequences for people's social, political, and health outcomes. 
+My research spans political science, sociology, and public health and uses quasi-experimental methods and large, longitudinal administrative datasets. I ask questions pertaining to the dynamic and fluid nature of racial and ethnic categorization and the consequences for people's social, political, and health outcomes. 
 
 My PhD centres the Asian diaspora in Canada and the UK to examine how the differential racialization of Asian ethnic groups can often produce more heterogeneity within the diaspora than between, despite shared homogenization as a panethnic group. 
 You can check out my first PhD paper, which looks at how COVID-19 anti-Asian racism affected Asian Canadians' party support, [here](https://doi.org/10.1007/s12552-025-09480-y). 
